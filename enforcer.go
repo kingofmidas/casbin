@@ -30,6 +30,7 @@ import (
 	"github.com/casbin/casbin/v2/rbac"
 	defaultrolemanager "github.com/casbin/casbin/v2/rbac/default-role-manager"
 	"github.com/casbin/casbin/v2/util"
+	"github.com/sirupsen/logrus"
 )
 
 // Enforcer is the main interface for authorization enforcement and policy management.
@@ -502,6 +503,8 @@ func (e *Enforcer) invalidateMatcherMap() {
 
 // enforce use a custom matcher to decides whether a "subject" can access a "object" with the operation "action", input parameters are usually: (matcher, sub, obj, act), use model matcher by default when matcher is "".
 func (e *Enforcer) enforce(matcher string, explains *[]string, rvals ...interface{}) (ok bool, err error) {
+	logrus.Info("MATCHER: %s. EXPL: %v. RVALS: %v", matcher, explains, rvals)
+
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("panic: %v\n%s", r, debug.Stack())
@@ -592,6 +595,7 @@ func (e *Enforcer) enforce(matcher string, explains *[]string, rvals ...interfac
 		matcherResults = make([]float64, policyLen)
 
 		for policyIndex, pvals := range e.model["p"][pType].Policy {
+			logrus.Info("TKNS: %v. PVALS: %v", e.model["p"][pType].Tokens, pvals)
 			// log.LogPrint("Policy Rule: ", pvals)
 			if len(e.model["p"][pType].Tokens) != len(pvals) {
 				return false, fmt.Errorf(
